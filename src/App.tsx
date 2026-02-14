@@ -2,25 +2,57 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import AppLayout from "@/components/AppLayout";
+import Auth from "@/pages/Auth";
+import Index from "@/pages/Index";
+import Classify from "@/pages/Classify";
+import HistoryPage from "@/pages/HistoryPage";
+import Stats from "@/pages/Stats";
+import Profile from "@/pages/Profile";
+import HumanClassifier from "@/pages/HumanClassifier";
+import Leaderboard from "@/pages/Leaderboard";
+import NotFound from "@/pages/NotFound";
+import { type ReactNode } from "react";
 
 const queryClient = new QueryClient();
 
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading...</div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <AppLayout>{children}</AppLayout>;
+};
+
+const AuthRoute = ({ children }: { children: ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/classify" element={<ProtectedRoute><Classify /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+            <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/classifier" element={<ProtectedRoute><HumanClassifier /></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
