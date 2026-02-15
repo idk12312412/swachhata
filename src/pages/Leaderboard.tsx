@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getRankInfo } from "@/hooks/useProfile";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -20,7 +20,7 @@ const Leaderboard = () => {
   });
 
   return (
-    <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Trophy className="w-6 h-6" /> Leaderboard
@@ -43,8 +43,8 @@ const Leaderboard = () => {
                     #{i + 1}
                   </span>
                   <span className="text-xl">{info.emoji}</span>
-                  <div className="flex-1">
-                    <p className="font-medium">{user.display_name || "Anonymous"}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{user.display_name || "Anonymous"}</p>
                     <p className="text-xs text-muted-foreground">{info.rank}</p>
                   </div>
                   <span className="font-bold text-primary">{user.points} pts</span>

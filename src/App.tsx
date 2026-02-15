@@ -13,6 +13,8 @@ import Stats from "@/pages/Stats";
 import Profile from "@/pages/Profile";
 import HumanClassifier from "@/pages/HumanClassifier";
 import Leaderboard from "@/pages/Leaderboard";
+import RecyclingTrip from "@/pages/RecyclingTrip";
+import Gallery from "@/pages/Gallery";
 import NotFound from "@/pages/NotFound";
 import { type ReactNode } from "react";
 
@@ -48,6 +50,8 @@ const App = () => (
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/classifier" element={<ProtectedRoute><HumanClassifier /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="/recycling-trip" element={<ProtectedRoute><RecyclingTrip /></ProtectedRoute>} />
+            <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -4,7 +4,7 @@ import { useClassifications } from "@/hooks/useClassifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Camera, Recycle, RotateCcw, Package, Trash2, Leaf, TrendingUp, TreePine } from "lucide-react";
+import { Camera, Recycle, RotateCcw, Package, Trash2, Leaf, TrendingUp, TreePine, History, Truck, Image } from "lucide-react";
 import { motion } from "framer-motion";
 
 const classificationIcons: Record<string, any> = {
@@ -22,7 +22,7 @@ const Index = () => {
   const totalCo2 = recentItems?.reduce((sum, i) => sum + Number(i.co2_saved), 0) ?? 0;
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       {/* Welcome Banner */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="bg-primary text-primary-foreground overflow-hidden relative">
@@ -76,7 +76,7 @@ const Index = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <Leaf className="w-5 h-5 mx-auto text-eco-leaf mb-1" />
-            <p className="text-2xl font-bold font-display">{totalCo2.toFixed(1)}</p>
+            <p className="text-2xl font-bold font-display">{totalCo2.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground">kg CO₂</p>
           </CardContent>
         </Card>
@@ -87,6 +87,37 @@ const Index = () => {
             <p className="text-xs text-muted-foreground">Points</p>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Quick Links */}
+      <motion.div
+        className="grid grid-cols-2 gap-3"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <Link to="/recycling-trip">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            <CardContent className="p-4 flex items-center gap-3">
+              <Truck className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Trip Planner</p>
+                <p className="text-xs text-muted-foreground">Plan recycling visits</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/gallery">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            <CardContent className="p-4 flex items-center gap-3">
+              <Image className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <p className="font-medium text-sm">Gallery</p>
+                <p className="text-xs text-muted-foreground">View classified items</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </motion.div>
 
       {/* Recent Activity */}
@@ -133,8 +164,5 @@ const Index = () => {
     </div>
   );
 };
-
-// Need to import History icon
-import { History } from "lucide-react";
 
 export default Index;

@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Recycle, RotateCcw, Package, Trash2, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +32,7 @@ const Classify = () => {
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ClassificationResult | null>(null);
+  const [selfClassified, setSelfClassified] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,6 +43,7 @@ const Classify = () => {
     setFile(f);
     setPreview(URL.createObjectURL(f));
     setResult(null);
+    setSelfClassified(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -54,35 +56,28 @@ const Classify = () => {
     if (!file || !user) return;
     setLoading(true);
     try {
-      // Upload image to storage
       const ext = file.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("waste-images")
-        .upload(path, file);
+      const { error: uploadError } = await supabase.storage.from("waste-images").upload(path, file);
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("waste-images").getPublicUrl(path);
       const imageUrl = urlData.publicUrl;
 
-      // Convert to base64 for AI
       const reader = new FileReader();
       const base64 = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(file);
       });
 
-      // Call AI edge function
       const { data, error } = await supabase.functions.invoke("classify-waste", {
         body: { image_base64: base64, image_url: imageUrl },
       });
-
       if (error) throw error;
 
       const classResult = data as ClassificationResult;
       setResult(classResult);
 
-      // Save classification to DB
       await supabase.from("classifications").insert({
         user_id: user.id,
         image_url: imageUrl,
@@ -95,25 +90,15 @@ const Classify = () => {
         recycling_steps: classResult.recycling_steps,
       });
 
-      // Award points if classified
       if (!classResult.is_flagged) {
         const points = Math.round(classResult.co2_saved * 10) + 5;
         await supabase.from("points_history").insert({
-          user_id: user.id,
-          points,
+          user_id: user.id, points,
           reason: `Classified: ${classResult.item_description}`,
         });
-        // Update profile points
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("points")
-          .eq("user_id", user.id)
-          .single();
+        const { data: profile } = await supabase.from("profiles").select("points").eq("user_id", user.id).single();
         if (profile) {
-          await supabase
-            .from("profiles")
-            .update({ points: profile.points + points })
-            .eq("user_id", user.id);
+          await supabase.from("profiles").update({ points: profile.points + points }).eq("user_id", user.id);
         }
       }
 
@@ -134,14 +119,20 @@ const Classify = () => {
     }
   };
 
+  const handleSelfClassify = async (type: string) => {
+    setSelfClassified(true);
+    toast({ title: "Thanks!", description: "Your classification has been recorded." });
+  };
+
   const reset = () => {
     setFile(null);
     setPreview("");
     setResult(null);
+    setSelfClassified(false);
   };
 
   return (
-    <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold">Classify Waste</h1>
         <p className="text-muted-foreground text-sm mt-1">Take a photo or upload an image of your waste item</p>
@@ -162,7 +153,7 @@ const Classify = () => {
                     <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
                     <p className="font-medium">Drop an image here or click to upload</p>
                     <p className="text-sm text-muted-foreground mt-1">JPG, PNG up to 10MB</p>
-                    <div className="flex gap-2 justify-center mt-4">
+                    <div className="flex gap-2 justify-center mt-4 flex-wrap">
                       <Button variant="outline" size="sm" className="gap-2">
                         <Upload className="w-4 h-4" /> Browse Files
                       </Button>
@@ -175,24 +166,15 @@ const Classify = () => {
                   <div className="space-y-4">
                     <div className="relative">
                       <img src={preview} alt="Waste item" className="w-full max-h-64 object-contain rounded-lg" />
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="absolute top-2 right-2 h-8 w-8"
-                        onClick={reset}
-                      >
+                      <Button variant="secondary" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={reset}>
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
                     <Button className="w-full gap-2" onClick={classify} disabled={loading}>
                       {loading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" /> Analyzing...
-                        </>
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing...</>
                       ) : (
-                        <>
-                          <Recycle className="w-4 h-4" /> Classify This Item
-                        </>
+                        <><Recycle className="w-4 h-4" /> Classify This Item</>
                       )}
                     </Button>
                   </div>
@@ -210,7 +192,6 @@ const Classify = () => {
           </motion.div>
         ) : (
           <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
-            {/* Result Card */}
             <Card className="border-primary/30">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
@@ -246,7 +227,7 @@ const Classify = () => {
                       </div>
                       <div className="p-3 rounded-lg bg-muted">
                         <p className="text-xs text-muted-foreground">CO₂ Saved</p>
-                        <p className="font-medium text-sm">{result.co2_saved} kg</p>
+                        <p className="font-medium text-sm">{Number(result.co2_saved).toFixed(2)} kg</p>
                       </div>
                     </>
                   )}
@@ -265,27 +246,30 @@ const Classify = () => {
                   </div>
                 )}
 
-                {result.is_flagged && (
+                {result.is_flagged && !selfClassified && (
                   <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-sm">
                     <p>The AI couldn't confidently classify this item (confidence: {(result.confidence * 100).toFixed(0)}%).</p>
-                    <p className="mt-1">It's been sent to our human classifiers for review. You'll get your points once it's classified!</p>
+                    <p className="mt-1">It's been sent to our human classifiers for review.</p>
                     <p className="mt-2 font-medium">Want to classify it yourself?</p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-2 flex-wrap">
                       {["recycle", "reuse", "keep", "dispose"].map((type) => (
                         <Button
                           key={type}
                           variant="outline"
                           size="sm"
                           className="capitalize"
-                          onClick={async () => {
-                            // User self-classifies
-                            toast({ title: "Thanks!", description: "Your classification has been recorded." });
-                          }}
+                          onClick={() => handleSelfClassify(type)}
                         >
                           {typeConfig[type]?.label?.split(" ")[0]}
                         </Button>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {result.is_flagged && selfClassified && (
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-center">
+                    ✅ Thanks for your classification! Points will be awarded after review.
                   </div>
                 )}
               </CardContent>
