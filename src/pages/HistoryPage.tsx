@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { useClassifications } from "@/hooks/useClassifications";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Recycle, RotateCcw, Package, Trash2, Search, History } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Recycle, RotateCcw, Package, Trash2, Search, History, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 
 const icons: Record<string, any> = { recycle: Recycle, reuse: RotateCcw, keep: Package, dispose: Trash2 };
 
 const HistoryPage = () => {
   const { data: items, isLoading } = useClassifications();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [clearOpen, setClearOpen] = useState(false);
 
   const filtered = items?.filter((item) => {
     const matchSearch =
@@ -22,12 +32,58 @@ const HistoryPage = () => {
     return matchSearch && matchFilter;
   });
 
+  const deleteItem = async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("classifications").delete().eq("id", id).eq("user_id", user.id);
+    if (error) {
+      toast({ title: "Error deleting", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["classifications"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      toast({ title: "Item deleted" });
+    }
+  };
+
+  const clearAll = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("classifications").delete().eq("user_id", user.id);
+    if (error) {
+      toast({ title: "Error clearing", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["classifications"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      toast({ title: "All items cleared" });
+    }
+    setClearOpen(false);
+  };
+
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-display font-bold flex items-center gap-2">
-          <History className="w-6 h-6" /> Classification History
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-display font-bold flex items-center gap-2">
+            <History className="w-6 h-6" /> Classification History
+          </h1>
+          {items && items.length > 0 && (
+            <Dialog open={clearOpen} onOpenChange={setClearOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-1">
+                  <Trash2 className="w-3 h-3" /> Clear All
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[90vw] sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Clear all items?</DialogTitle>
+                  <DialogDescription>This will permanently delete all your classified items. This action cannot be undone.</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setClearOpen(false)}>Cancel</Button>
+                  <Button variant="destructive" onClick={clearAll}>Delete All</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </motion.div>
 
       <div className="flex gap-3">
@@ -79,12 +135,17 @@ const HistoryPage = () => {
                         {item.material_type} · {new Date(item.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <div className="flex items-center gap-1.5">
-                        <Icon className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-medium capitalize">{item.classification_type || "Pending"}</span>
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <Icon className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium capitalize">{item.classification_type || "Pending"}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{Number(item.co2_saved).toFixed(2)} kg CO₂</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{Number(item.co2_saved).toFixed(2)} kg CO₂</p>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteItem(item.id)}>
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

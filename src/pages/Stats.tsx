@@ -7,6 +7,18 @@ import { motion } from "framer-motion";
 
 const COLORS = ["hsl(152,45%,35%)", "hsl(38,60%,55%)", "hsl(200,50%,55%)", "hsl(120,40%,45%)", "hsl(0,65%,50%)", "hsl(270,40%,55%)"];
 
+const formatCo2 = (value: number) => Number(value).toFixed(2);
+
+const Co2Tooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border bg-card p-2 shadow-sm text-sm">
+      <p className="text-muted-foreground">{label}</p>
+      <p className="font-medium">{formatCo2(payload[0].value)} kg CO₂</p>
+    </div>
+  );
+};
+
 const Stats = () => {
   const { data: stats, isLoading } = useStats();
   const { profile } = useProfile();
@@ -25,13 +37,12 @@ const Stats = () => {
         .map(([date, count]) => ({ date: date.slice(5), count }))
     : [];
 
-  // Cumulative CO2 line
   const lineData = stats?.items
     ? [...stats.items]
         .sort((a, b) => a.created_at.localeCompare(b.created_at))
         .reduce<{ date: string; co2: number }[]>((acc, item) => {
           const prev = acc.length > 0 ? acc[acc.length - 1].co2 : 0;
-          acc.push({ date: item.created_at.slice(5, 10), co2: prev + Number(item.co2_saved) });
+          acc.push({ date: item.created_at.slice(5, 10), co2: Number((prev + Number(item.co2_saved)).toFixed(2)) });
           return acc;
         }, [])
     : [];
@@ -39,14 +50,13 @@ const Stats = () => {
   const treesEquivalent = ((stats?.totalCo2 ?? 0) / 21.77).toFixed(1);
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <BarChart3 className="w-6 h-6" /> Your Impact
         </h1>
       </motion.div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
           <CardContent className="p-4 text-center">
@@ -58,7 +68,7 @@ const Stats = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <Leaf className="w-6 h-6 mx-auto text-eco-leaf mb-2" />
-            <p className="text-3xl font-bold font-display">{(stats?.totalCo2 ?? 0).toFixed(1)}</p>
+            <p className="text-3xl font-bold font-display">{formatCo2(stats?.totalCo2 ?? 0)}</p>
             <p className="text-xs text-muted-foreground">kg CO₂ Saved</p>
           </CardContent>
         </Card>
@@ -78,7 +88,6 @@ const Stats = () => {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid md:grid-cols-2 gap-4">
         {pieData.length > 0 && (
           <Card>
@@ -129,8 +138,8 @@ const Stats = () => {
                 <LineChart data={lineData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                  <YAxis />
-                  <Tooltip />
+                  <YAxis tickFormatter={(v) => Number(v).toFixed(1)} />
+                  <Tooltip content={<Co2Tooltip />} />
                   <Line type="monotone" dataKey="co2" stroke="hsl(120,40%,45%)" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>

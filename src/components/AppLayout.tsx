@@ -2,14 +2,16 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, getRankInfo } from "@/hooks/useProfile";
-import { Home, Camera, History, BarChart3, User, Shield, LogOut, Leaf } from "lucide-react";
+import { Home, Camera, History, BarChart3, User, Shield, LogOut, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/Logo";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/classify", icon: Camera, label: "Classify" },
   { to: "/history", icon: History, label: "History" },
   { to: "/stats", icon: BarChart3, label: "Stats" },
+  { to: "/leaderboard", icon: Trophy, label: "Board" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 
@@ -24,10 +26,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Desktop header */}
       <header className="hidden md:flex items-center justify-between px-6 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <Leaf className="w-4 h-4 text-primary" />
-          </div>
-          <span className="font-display font-bold text-lg text-foreground">EcoSort</span>
+          <Logo variant="icon" iconClassName="w-8 h-8" />
+          <span className="font-display font-bold text-lg text-foreground">Swacchata</span>
         </Link>
         <nav className="flex items-center gap-1">
           {navItems.map((item) => (
@@ -64,8 +64,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Mobile header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/" className="flex items-center gap-2">
-          <Leaf className="w-5 h-5 text-primary" />
-          <span className="font-display font-bold">EcoSort</span>
+          <Logo variant="icon" iconClassName="w-6 h-6" />
+          <span className="font-display font-bold">Swacchata</span>
         </Link>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium">{rankInfo.emoji} {profile?.points ?? 0}</span>

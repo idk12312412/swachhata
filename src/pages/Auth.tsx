@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import Logo from "@/components/Logo";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,11 +50,11 @@ const Auth = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <Card className="w-full max-w-md shadow-xl border-primary/20">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Leaf className="w-7 h-7 text-primary" />
+            <div className="mx-auto">
+              <Logo variant="icon" iconClassName="w-14 h-14" />
             </div>
             <CardTitle className="text-2xl font-display">
-              {isLogin ? "Welcome Back" : "Join EcoSort"}
+              {isLogin ? "Welcome Back" : "Join Swacchata"}
             </CardTitle>
             <CardDescription>
               {isLogin ? "Sign in to track your environmental impact" : "Start making a difference today"}
