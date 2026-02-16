@@ -30,7 +30,7 @@ const Index = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-primary-foreground/80 text-sm">Welcome back,</p>
-                <h1 className="text-2xl font-display font-bold mt-1">
+                <h1 className="text-3xl md:text-4xl font-display font-extrabold mt-1">
                   {profile?.display_name || "Eco Warrior"} {rankInfo.emoji}
                 </h1>
                 <p className="mt-2 text-sm text-primary-foreground/70">
