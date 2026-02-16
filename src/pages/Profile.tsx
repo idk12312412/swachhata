@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, getRankInfo } from "@/hooks/useProfile";
 import { useStats } from "@/hooks/useClassifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
-import { User, Leaf, Recycle, Trophy, Save, Loader2 } from "lucide-react";
+import { User, Leaf, Recycle, Trophy, Save, Loader2, Moon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -19,6 +20,26 @@ const Profile = () => {
 
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [saving, setSaving] = useState(false);
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  useEffect(() => {
+    setDisplayName(profile?.display_name ?? "");
+  }, [profile?.display_name]);
+
+  const toggleDark = (val: boolean) => {
+    setDark(val);
+    document.documentElement.classList.toggle("dark", val);
+    localStorage.setItem("swacchata-theme", val ? "dark" : "light");
+  };
+
+  // Init theme from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("swacchata-theme");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+      setDark(true);
+    }
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -35,7 +56,6 @@ const Profile = () => {
   return (
     <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        {/* Rank Card */}
         <Card className="bg-primary text-primary-foreground">
           <CardContent className="p-6 text-center">
             <span className="text-5xl">{rankInfo.emoji}</span>
@@ -53,7 +73,6 @@ const Profile = () => {
         </Card>
       </motion.div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 text-center">
@@ -65,7 +84,7 @@ const Profile = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <Leaf className="w-5 h-5 mx-auto text-eco-leaf mb-1" />
-            <p className="text-xl font-bold">{(stats?.totalCo2 ?? 0).toFixed(1)}</p>
+            <p className="text-xl font-bold">{(stats?.totalCo2 ?? 0).toFixed(2)}</p>
             <p className="text-xs text-muted-foreground">kg CO₂</p>
           </CardContent>
         </Card>
@@ -78,7 +97,6 @@ const Profile = () => {
         </Card>
       </div>
 
-      {/* Settings */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -93,6 +111,13 @@ const Profile = () => {
           <div>
             <label className="text-sm text-muted-foreground">Display Name</label>
             <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-2">
+              <Moon className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">Dark Mode</span>
+            </div>
+            <Switch checked={dark} onCheckedChange={toggleDark} />
           </div>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

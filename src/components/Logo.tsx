@@ -1,5 +1,5 @@
 import logoIcon from "@/assets/logo-icon.png";
-import logoFull from "@/assets/logo-full.jpeg";
+import logoFull from "@/assets/logo-full.png";
 
 interface LogoProps {
   variant?: "icon" | "full";

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
+import Home from "@/pages/Home";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import Classify from "@/pages/Classify";
@@ -15,10 +16,22 @@ import HumanClassifier from "@/pages/HumanClassifier";
 import Leaderboard from "@/pages/Leaderboard";
 import RecyclingTrip from "@/pages/RecyclingTrip";
 import Gallery from "@/pages/Gallery";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 const queryClient = new QueryClient();
+
+// Init theme from localStorage
+const initTheme = () => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("swacchata-theme");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  }
+};
+initTheme();
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
@@ -30,7 +43,14 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 const AuthRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
+const PublicRoute = ({ children }: { children: ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
@@ -42,8 +62,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
             <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/classify" element={<ProtectedRoute><Classify /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
             <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />

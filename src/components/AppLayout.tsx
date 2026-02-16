@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 
 const navItems = [
-  { to: "/", icon: Home, label: "Home" },
+  { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/classify", icon: Camera, label: "Classify" },
   { to: "/history", icon: History, label: "History" },
   { to: "/stats", icon: BarChart3, label: "Stats" },
@@ -22,12 +22,11 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   const rankInfo = getRankInfo(profile?.points ?? 0);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col transition-colors duration-200">
       {/* Desktop header */}
       <header className="hidden md:flex items-center justify-between px-6 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <Link to="/" className="flex items-center gap-2">
-          <Logo variant="icon" iconClassName="w-8 h-8" />
-          <span className="font-display font-bold text-lg text-foreground">Swacchata</span>
+        <Link to="/dashboard">
+          <Logo variant="full" className="h-9" />
         </Link>
         <nav className="flex items-center gap-1">
           {navItems.map((item) => (
@@ -63,9 +62,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Mobile header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <Link to="/" className="flex items-center gap-2">
-          <Logo variant="icon" iconClassName="w-6 h-6" />
-          <span className="font-display font-bold">Swacchata</span>
+        <Link to="/dashboard">
+          <Logo variant="full" className="h-7" />
         </Link>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium">{rankInfo.emoji} {profile?.points ?? 0}</span>
