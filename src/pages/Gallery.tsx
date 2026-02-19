@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useClassifications } from "@/hooks/useClassifications";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Image } from "lucide-react";
+import { Image, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Gallery = () => {
+  const navigate = useNavigate();
   const { data: items, isLoading } = useClassifications();
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -13,7 +16,10 @@ const Gallery = () => {
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Image className="w-6 h-6" /> Gallery
         </h1>

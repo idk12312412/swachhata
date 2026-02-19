@@ -34,6 +34,7 @@ const Classify = () => {
   const [result, setResult] = useState<ClassificationResult | null>(null);
   const [selfClassified, setSelfClassified] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -154,10 +155,10 @@ const Classify = () => {
                     <p className="font-medium">Drop an image here or click to upload</p>
                     <p className="text-sm text-muted-foreground mt-1">JPG, PNG up to 10MB</p>
                     <div className="flex gap-2 justify-center mt-4 flex-wrap">
-                      <Button variant="outline" size="sm" className="gap-2">
+                      <Button variant="outline" size="sm" className="gap-2" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
                         <Upload className="w-4 h-4" /> Browse Files
                       </Button>
-                      <Button variant="outline" size="sm" className="gap-2">
+                      <Button variant="outline" size="sm" className="gap-2" onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}>
                         <Camera className="w-4 h-4" /> Take Photo
                       </Button>
                     </div>
@@ -181,6 +182,13 @@ const Classify = () => {
                 )}
                 <input
                   ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                />
+                <input
+                  ref={cameraInputRef}
                   type="file"
                   accept="image/*"
                   capture="environment"
