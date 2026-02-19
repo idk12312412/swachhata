@@ -17,6 +17,7 @@ import Leaderboard from "@/pages/Leaderboard";
 import RecyclingTrip from "@/pages/RecyclingTrip";
 import Gallery from "@/pages/Gallery";
 import ResetPassword from "@/pages/ResetPassword";
+import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
 import { type ReactNode, useEffect } from "react";
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/recycling-trip" element={<ProtectedRoute><RecyclingTrip /></ProtectedRoute>} />
             <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

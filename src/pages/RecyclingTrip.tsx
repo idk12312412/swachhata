@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Truck, MapPin, Navigation, Loader2, RefreshCw } from "lucide-react";
+import { Truck, MapPin, Navigation, Loader2, RefreshCw, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "leaflet/dist/leaflet.css";
 
@@ -38,6 +39,7 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 const RecyclingTrip = () => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState("");
   const [category, setCategory] = useState("");
   const [result, setResult] = useState<{ days: number; progress: number } | null>(null);
@@ -74,7 +76,7 @@ const RecyclingTrip = () => {
       setUserPos({ lat, lng });
 
       // Fetch from Overpass API
-      const query = `[out:json][timeout:10];node["amenity"="recycling"](around:5000,${lat},${lng});out body;`;
+      const query = `[out:json][timeout:10];node["amenity"="recycling"](around:10000,${lat},${lng});out body;`;
       const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
       const data = await res.json();
 
@@ -156,10 +158,17 @@ const RecyclingTrip = () => {
   return (
     <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6 overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-display font-bold flex items-center gap-2">
-          <Truck className="w-6 h-6" /> Recycling Trip Planner
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">Estimate when to visit your recycling center</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-display font-bold flex items-center gap-2">
+              <Truck className="w-6 h-6" /> Recycling Trip Planner
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">Estimate when to visit your recycling center</p>
+          </div>
+        </div>
       </motion.div>
 
       <Card>
@@ -223,7 +232,7 @@ const RecyclingTrip = () => {
         <CardContent className="space-y-3">
           {!showMap && (
             <div className="text-center space-y-3 py-2">
-              <p className="text-sm text-muted-foreground">Find recycling facilities within 5km of your location.</p>
+              <p className="text-sm text-muted-foreground">Find recycling facilities within 10km of your location.</p>
               <Button onClick={loadMap} disabled={mapLoading} className="gap-2">
                 {mapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
                 Find Nearby Recycling Centers
@@ -235,7 +244,7 @@ const RecyclingTrip = () => {
           {showMap && (
             <>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Showing recycling centers within 5km of your location.</p>
+                <p className="text-xs text-muted-foreground">Showing recycling centers within 10km of your location.</p>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setShowMap(false); loadMap(); }}>
                   <RefreshCw className="w-3.5 h-3.5" />
                 </Button>
@@ -243,7 +252,7 @@ const RecyclingTrip = () => {
               <div ref={mapRef} className="w-full h-[350px] md:h-[450px] rounded-lg border overflow-hidden" />
 
               {centers.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-2">No recycling centers found within 5km.</p>
+                <p className="text-sm text-muted-foreground text-center py-2">No recycling centers found within 10km.</p>
               ) : (
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {centers.map((c) => (

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, getRankInfo } from "@/hooks/useProfile";
+import { useIsAdmin } from "@/hooks/useAdmin";
 import { Home, Camera, History, BarChart3, User, Shield, LogOut, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
@@ -19,6 +20,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const { profile } = useProfile();
+  const { data: isAdmin } = useIsAdmin();
   const rankInfo = getRankInfo(profile?.points ?? 0);
 
   return (
@@ -26,7 +28,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Desktop header */}
       <header className="hidden md:flex items-center justify-between px-6 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/dashboard">
-          <Logo variant="full" className="h-9" />
+          <Logo variant="full" className="h-11" />
         </Link>
         <nav className="flex items-center gap-1">
           {navItems.map((item) => (
@@ -49,6 +51,14 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
               </Button>
             </Link>
           )}
+          {isAdmin && (
+            <Link to="/admin">
+              <Button variant={pathname === "/admin" ? "secondary" : "ghost"} size="sm" className="gap-2">
+                <Shield className="w-4 h-4" />
+                Admin
+              </Button>
+            </Link>
+          )}
         </nav>
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium">
@@ -63,7 +73,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Mobile header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/dashboard">
-          <Logo variant="full" className="h-7" />
+          <Logo variant="full" className="h-9" />
         </Link>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium">{rankInfo.emoji} {profile?.points ?? 0}</span>
