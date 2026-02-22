@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -38,7 +38,8 @@ serve(async (req) => {
 
     if (!roleData) throw new Error("Unauthorized: admin access required");
 
-    const { action, target_user_id, updates } = await req.json();
+    const body = await req.json();
+    const { action, target_user_id, updates, post_id } = body;
 
     switch (action) {
       case "list_users": {
@@ -53,7 +54,6 @@ serve(async (req) => {
 
       case "delete_user": {
         if (!target_user_id) throw new Error("target_user_id required");
-        // Delete from auth (cascades to profiles, user_roles)
         const { error } = await supabase.auth.admin.deleteUser(target_user_id);
         if (error) throw error;
         return new Response(JSON.stringify({ success: true }), {
@@ -73,10 +73,18 @@ serve(async (req) => {
         });
       }
 
+      case "delete_blog_post": {
+        if (!post_id) throw new Error("post_id required");
+        const { error } = await supabase.from("blog_posts").delete().eq("id", post_id);
+        if (error) throw error;
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       case "delete_classification": {
-        const { classification_id } = await req.json().catch(() => ({}));
+        const { classification_id } = body;
         if (!classification_id && !target_user_id) throw new Error("classification_id or target_user_id required");
-        // Delete specific classification or all for a user
         let query = supabase.from("classifications").delete();
         if (classification_id) {
           query = query.eq("id", classification_id);

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, getRankInfo } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useAdmin";
-import { Home, Camera, History, BarChart3, User, Shield, LogOut, Trophy } from "lucide-react";
+import { Home, Camera, History, BarChart3, User, Shield, LogOut, Trophy, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 
@@ -13,6 +13,7 @@ const navItems = [
   { to: "/history", icon: History, label: "History" },
   { to: "/stats", icon: BarChart3, label: "Stats" },
   { to: "/leaderboard", icon: Trophy, label: "Board" },
+  { to: "/gallery", icon: PenSquare, label: "Blog" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 
@@ -28,7 +29,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Desktop header */}
       <header className="hidden md:flex items-center justify-between px-6 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/dashboard">
-          <Logo variant="full" className="h-11" />
+          <Logo variant="full" className="h-14" />
         </Link>
         <nav className="flex items-center gap-1">
           {navItems.map((item) => (
@@ -73,7 +74,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
       {/* Mobile header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <Link to="/dashboard">
-          <Logo variant="full" className="h-9" />
+          <Logo variant="full" className="h-11" />
         </Link>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium">{rankInfo.emoji} {profile?.points ?? 0}</span>
