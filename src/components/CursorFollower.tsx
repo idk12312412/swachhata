@@ -8,12 +8,12 @@ interface Particle {
   scale: number;
 }
 
-const CURSOR_SIZE = 20;
-const PARTICLE_SIZE = 8;
-const TRAIL_LENGTH = 12;
+const CURSOR_SIZE = 28;
+const PARTICLE_SIZE = 11;
+const TRAIL_LENGTH = 14;
 const EASE = 0.15;
-const MAGNETIC_RANGE = 80;
-const MAGNETIC_STRENGTH = 0.3;
+const MAGNETIC_RANGE = 120;
+const MAGNETIC_STRENGTH = 0.5;
 
 const CursorFollower = () => {
   const isMobile = useIsMobile();
