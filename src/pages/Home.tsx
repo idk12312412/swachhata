@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Camera, Leaf, Truck, Trophy, ChevronDown, Mail, ArrowRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import Logo from "@/components/Logo";
-import CursorFollower from "@/components/CursorFollower";
 import heroBg from "@/assets/hero-bg.jpg";
 import logoFull from "@/assets/logo-full.png";
 
