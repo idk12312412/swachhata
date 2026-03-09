@@ -39,6 +39,7 @@ const devAssociates = [
 
 const Home = () => (
   <div className="min-h-screen flex flex-col bg-background">
+    <CursorFollower />
     {/* Navbar */}
     <nav className="absolute top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4">
       <Logo variant="full" className="h-14 md:h-16 drop-shadow-lg" />
